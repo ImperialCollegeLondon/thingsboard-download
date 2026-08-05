@@ -1,10 +1,47 @@
 [project]
 name = "thingsboard-download"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "pandas>=3.0.5",
+    "python-dotenv>=1.2.2",
+    "tb-rest-client>=4.3",
+]
 
 [dependency-groups]
-dev = ["pre-commit>=4.6.1"]
+dev = [
+    "pre-commit>=4.6.1",
+    "pytest>=9.1.1",
+]
+
+[tool.ruff]
+target-version = "py313"
+exclude = ["main/migrations/"]
+
+[tool.ruff.lint]
+select = [
+    "D",   # pydocstyle
+    "E",   # pycodestyle
+    "F",   # Pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "RUF", # ruff
+]
+pydocstyle.convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "D100", # Missing docstring in public module
+    "D104", # Missing docstring in public package
+]
+
+[build-system]
+requires = ["setuptools>=83.0.0", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["thingsboard_download"]
+
+[tool.setuptools_scm]
