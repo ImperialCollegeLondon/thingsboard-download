@@ -1,0 +1,19 @@
+[thingsboard]
+url = "https://example.com"             # Thingsboard URL
+
+[auth]
+# You can either use a username and password OR an API key
+username = "your.username@example.com"
+password = "your-password"
+# api_key = "your-api-key"
+
+[download]
+devices = ["DEVICE001", "DEVICE002"]
+variables = ["fec", "turbidity"]        # This will default to all variable names if not provided
+start_time = "2026-08-01 09:00:00"
+end_time = "2026-08-01 16:00:00"
+output_dir = "output"                   # This is the directory where output files are saved
+# These are optional timeseries arguments
+# interval = 60000
+# limit = 500
+# agg = "AVG"
