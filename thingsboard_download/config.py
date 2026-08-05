@@ -26,15 +26,17 @@ def load_config(
 
 def load_device_details(
     source: str | Path = Path(__file__).parent.parent / "config.toml",
-) -> dict[str, Any]:
+) -> tuple[
+    list[str], list[str] | None, datetime, datetime, int | None, int | None, str | None
+]:
     """Load the details for the data download.
 
     Args:
         source: The path to the TOML configuration file. Defaults to "config.toml".
 
     Returns:
-        A tuple containing the list of devices, list of variables, start time
-            and end time.
+        A tuple containing the list of devices, list of variables, start time,
+            end time, interval, limit and aggregation.
     """
     config = load_config(source)
     download = config.get("download", {})
@@ -56,6 +58,14 @@ def load_device_details(
         else download.get("variables")
     )
 
+    interval = os.getenv("INTERVAL", download.get("interval"))
+    interval = int(interval) if interval is not None else None
+
+    limit = os.getenv("LIMIT", download.get("limit"))
+    limit = int(limit) if limit is not None else None
+
+    agg = os.getenv("AGG", download.get("agg"))
+
     if start_time := os.getenv("START_TIME", download.get("start_time")):
         start_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
 
@@ -72,7 +82,7 @@ def load_device_details(
         start_time = end_time - timedelta(days=30)
         start_time = start_time.replace(hour=0, minute=0, second=0, microsecond=0)
 
-    return devices, variables, start_time, end_time
+    return devices, variables, start_time, end_time, interval, limit, agg
 
 
 def load_credentials(

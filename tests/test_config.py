@@ -21,22 +21,45 @@ def test_load_config(config_file):
 
 def test_load_device_details_from_config(config_file):
     """Tests the load_device_details function with a config file."""
-    devices, variables, start_time, end_time = load_device_details(config_file)
+    devices, variables, start_time, end_time, interval, limit, agg = (
+        load_device_details(config_file)
+    )
     assert devices == ["DEV001", "DEV002"]
     assert variables == ["h", "t"]
     assert start_time == datetime(2026, 8, 1, 9, 0, 0)
     assert end_time == datetime(2026, 8, 1, 16, 0, 0)
+    assert interval is None
+    assert limit is None
+    assert agg is None
 
 
 def test_load_device_details_from_env_var(config_file, monkeypatch):
     """Tests the load_device_details function with env vars."""
     monkeypatch.setenv("DEVICES", "DEV003,DEV004")
     monkeypatch.setenv("VARIABLES", "var1,var2")
-    devices, variables, start_time, end_time = load_device_details(config_file)
+    devices, variables, start_time, end_time, interval, limit, agg = (
+        load_device_details(config_file)
+    )
     assert devices == ["DEV003", "DEV004"]
     assert variables == ["var1", "var2"]
     assert start_time == datetime(2026, 8, 1, 9, 0, 0)
     assert end_time == datetime(2026, 8, 1, 16, 0, 0)
+    assert interval is None
+    assert limit is None
+    assert agg is None
+
+
+def test_load_device_details_optional_timeseries_from_env_var(config_file, monkeypatch):
+    """Tests optional timeseries settings are loaded from env vars."""
+    monkeypatch.setenv("INTERVAL", "60000")
+    monkeypatch.setenv("LIMIT", "500")
+    monkeypatch.setenv("AGG", "AVG")
+
+    _, _, _, _, interval, limit, agg = load_device_details(config_file)
+
+    assert interval == 60000
+    assert limit == 500
+    assert agg == "AVG"
 
 
 def test_load_device_details_default_times(tmp_path):
@@ -55,12 +78,44 @@ variables = ["h", "t"]
 output_dir = "."
 """
     )
-    _, _, start_time, end_time = load_device_details(tmp_path / "config.toml")
+    _, _, start_time, end_time, interval, limit, agg = load_device_details(
+        tmp_path / "config.toml"
+    )
     today = datetime.today()
     assert today.day == end_time.day
     assert today.month == end_time.month
     assert (end_time - start_time).days == 30
     assert start_time.hour == 0
+    assert interval is None
+    assert limit is None
+    assert agg is None
+
+
+def test_load_device_details_optional_timeseries_from_config(tmp_path):
+    """Tests optional timeseries settings are loaded from config."""
+    (tmp_path / "config.toml").write_text(
+        """\
+[thingsboard]
+url = "https://example.com"
+
+[auth]
+api_key = "test_api_key"
+
+[download]
+devices = ["DEV001"]
+start_time = "2026-08-01 09:00:00"
+end_time = "2026-08-01 16:00:00"
+interval = 120000
+limit = 200
+agg = "MAX"
+"""
+    )
+
+    _, _, _, _, interval, limit, agg = load_device_details(tmp_path / "config.toml")
+
+    assert interval == 120000
+    assert limit == 200
+    assert agg == "MAX"
 
 
 def test_load_device_details_no_devices(tmp_path):

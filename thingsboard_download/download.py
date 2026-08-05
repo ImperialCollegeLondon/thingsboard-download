@@ -15,6 +15,9 @@ def download_data_for_device(
     start_time: datetime,
     end_time: datetime,
     variables: list[str] | None = None,
+    interval: int | None = None,
+    limit: int | None = None,
+    agg: str | None = None,
 ) -> pd.DataFrame:
     """Download data for one device and create a Pandas dataframe.
 
@@ -23,8 +26,11 @@ def download_data_for_device(
         device_name: The name of the device to download data for.
         start_time: The start time for the data download.
         end_time: The end time for the data download.
-        variables: The list of variables to download.If None, all
+        variables: The list of variables to download. If None, all
             variables will be downloaded.
+        interval: Timeseries interval in milliseconds.
+        limit: Maximum number of data points to fetch.
+        agg: Aggregation type to use.
 
     Returns:
         A Pandas dataframe containing the downloaded data.
@@ -40,7 +46,9 @@ def download_data_for_device(
         keys=",".join(variables),
         start_ts=int(start_time.timestamp() * 1000),
         end_ts=int(end_time.timestamp() * 1000),
-        limit=100,
+        interval=interval,
+        limit=limit,
+        agg=agg,
     )
 
     df = process_downloaded_data(data, variables)
@@ -54,6 +62,9 @@ def get_data(
     start_time: datetime,
     end_time: datetime,
     variables: list[str] | None = None,
+    interval: int | None = None,
+    limit: int | None = None,
+    agg: str | None = None,
 ) -> list[pd.DataFrame]:
     """Downloads all data for a set of devices and variables.
 
@@ -65,6 +76,9 @@ def get_data(
         end_time: The end time for the data download.
         variables: A list of variables to download. If None, all variables
             will be downloaded.
+        interval: Timeseries interval in milliseconds.
+        limit: Maximum number of data points to fetch.
+        agg: Aggregation type to use.
 
     Returns:
         A list of Pandas dataframes containing the downloaded data for each device.
@@ -84,7 +98,14 @@ def get_data(
 
         for device_name in device_names:
             df = download_data_for_device(
-                client, device_name, start_time, end_time, variables
+                client,
+                device_name,
+                start_time,
+                end_time,
+                variables,
+                interval,
+                limit,
+                agg,
             )
             dfs.append(df)
 
@@ -99,6 +120,9 @@ def download_and_save(
     end_time: datetime,
     output_dir: str | Path,
     variables: list[str] | None = None,
+    interval: int | None = None,
+    limit: int | None = None,
+    agg: str | None = None,
 ) -> None:
     """Download data for a set of devices and save each to a CSV file.
 
@@ -111,6 +135,9 @@ def download_and_save(
         output_dir: Directory in which to save the output CSV files.
         variables: A list of variables to download. If None, all variables
             will be downloaded.
+        interval: Timeseries interval in milliseconds.
+        limit: Maximum number of data points to fetch.
+        agg: Aggregation type to use.
     """
     output_dir = Path(output_dir)
 
@@ -125,7 +152,15 @@ def download_and_save(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     dfs = get_data(
-        thingsboard_url, credentials, device_names, start_time, end_time, variables
+        thingsboard_url,
+        credentials,
+        device_names,
+        start_time,
+        end_time,
+        variables,
+        interval,
+        limit,
+        agg,
     )
 
     for device_name, df in zip(device_names, dfs):

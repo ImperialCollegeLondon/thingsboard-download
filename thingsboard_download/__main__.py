@@ -64,9 +64,28 @@ def main() -> None:
         metavar="DIR",
         help="Directory to save output CSV files. Overrides config/env.",
     )
+    parser.add_argument(
+        "--interval",
+        type=int,
+        metavar="MS",
+        help="Timeseries interval in milliseconds. Overrides config/env.",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        metavar="N",
+        help="Maximum number of data points to fetch. Overrides config/env.",
+    )
+    parser.add_argument(
+        "--agg",
+        metavar="AGG",
+        help="Aggregation type for timeseries. Overrides config/env.",
+    )
     args = parser.parse_args()
 
-    devices, variables, start_time, end_time = load_device_details(args.config)
+    devices, variables, start_time, end_time, interval, limit, agg = (
+        load_device_details(args.config)
+    )
     connection = load_credentials(args.config)
 
     if args.devices:
@@ -77,6 +96,12 @@ def main() -> None:
         start_time = datetime.strptime(args.start_time, "%Y-%m-%d %H:%M:%S")
     if args.end_time:
         end_time = datetime.strptime(args.end_time, "%Y-%m-%d %H:%M:%S")
+    if args.interval is not None:
+        interval = args.interval
+    if args.limit is not None:
+        limit = args.limit
+    if args.agg is not None:
+        agg = args.agg
 
     if args.output_dir:
         output_dir = args.output_dir
@@ -96,6 +121,9 @@ def main() -> None:
         end_time=end_time,
         output_dir=output_dir,
         variables=variables,
+        interval=interval,
+        limit=limit,
+        agg=agg,
     )
 
 
