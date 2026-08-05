@@ -1,10 +1,13 @@
 """Config module."""
 
+import logging
 import os
 import tomllib
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 def load_config(
@@ -47,6 +50,7 @@ def load_device_details(
         else download.get("devices")
     )
     if not devices:
+        logger.error(f"No devices configured in env/config for source={source}.")
         raise ValueError(
             "No device name(s) provided. Provide device names using an environment "
             "variable or the config.toml file."
@@ -74,6 +78,9 @@ def load_device_details(
 
     # If only one of start_time or end_time is provided, raise an error
     if (start_time is None) != (end_time is None):
+        logger.error(
+            f"Invalid time configuration: start_time={start_time}, end_time={end_time}."
+        )
         raise ValueError("Both start_time and end_time must be provided together.")
 
     # If neither start_time nor end_time is provided, default to the last 30 days
@@ -81,6 +88,15 @@ def load_device_details(
         end_time = datetime.now()
         start_time = end_time - timedelta(days=30)
         start_time = start_time.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    logger.info(
+        f"Downloading data for devices {', '.join(devices)} from "
+        f"{start_time.isoformat(sep=' ')} to {end_time.isoformat(sep=' ')}."
+    )
+    if any([interval, limit, agg]):
+        logger.info(
+            f"Using optional args: LIMIT {limit}, INTERVAL {interval}, AGG {agg}."
+        )
 
     return devices, variables, start_time, end_time, interval, limit, agg
 
@@ -101,6 +117,9 @@ def load_credentials(
     # Get the Thingsboard URL
     tb_url = os.getenv("THINGSBOARD_URL", config.get("thingsboard", {}).get("url"))
     if not tb_url:
+        logger.error(
+            f"No Thingsboard URL configured in env/config for source={source}."
+        )
         raise ValueError(
             "No Thingsboard URL provided. Provide a URL using an environment variable"
             " or the config.toml file."
@@ -113,10 +132,15 @@ def load_credentials(
     api_key = os.getenv("THINGSBOARD_API_KEY", auth.get("api_key"))
 
     if api_key:
+        logger.info("Using API key to access Thingsboard.")
         credentials = {"type": "api_key", "value": api_key}
     elif username and password:
+        logger.info("Using username and password to access Thingsboard.")
         credentials = {"type": "password", "username": username, "password": password}
     else:
+        logger.error(
+            "No authentication details configured (API key or username/password)."
+        )
         raise ValueError(
             "No authentication details provided. Provide either an API key or username"
             " and password using environment variables or the config.toml file."

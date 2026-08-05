@@ -1,12 +1,16 @@
 """Download module."""
 
+import logging
 from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
+from tb_rest_client.rest import ApiException
 from tb_rest_client.rest_client_ce import RestClientCE
 
 from .utils import process_downloaded_data
+
+logger = logging.getLogger(__name__)
 
 
 def download_data_for_device(
@@ -40,6 +44,10 @@ def download_data_for_device(
     # If no variables are provided, get all variables for the device
     if not variables:
         variables = client.get_timeseries_keys_v1(device_id)
+
+    logger.info(
+        f"Downloading data for {', '.join(variables)} for device {device_name}."
+    )
 
     data = client.get_timeseries(
         entity_id=device_id,
@@ -85,16 +93,21 @@ def get_data(
     """
     dfs = []
     with RestClientCE(base_url=thingsboard_url) as client:
-        if credentials["type"] == "api_key":
-            client.api_key_login(credentials["value"])
+        try:
+            if credentials["type"] == "api_key":
+                client.api_key_login(credentials["value"])
 
-        elif credentials["type"] == "password":
-            client.login(credentials["username"], credentials["password"])
+            elif credentials["type"] == "password":
+                client.login(credentials["username"], credentials["password"])
 
-        else:
-            raise ValueError(
-                "Invalid credentials type. Must be 'api_key' or 'password'."
-            )
+            else:
+                logger.error("Invalid credentials provided.")
+                raise ValueError(
+                    "Invalid credentials type. Must be 'api_key' or 'password'."
+                )
+        except ApiException:
+            logger.exception("Failed to authenticate with ThingsBoard")
+            raise
 
         for device_name in device_names:
             df = download_data_for_device(
@@ -162,6 +175,8 @@ def download_and_save(
         limit,
         agg,
     )
+
+    logger.info(f"Saving data to directory '{output_dir}'.")
 
     for device_name, df in zip(device_names, dfs):
         path = output_dir / f"{device_name}.csv"

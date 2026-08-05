@@ -1,5 +1,6 @@
 """Main module."""
 
+import logging
 import os
 from argparse import ArgumentParser
 from datetime import datetime
@@ -9,6 +10,9 @@ from dotenv import load_dotenv
 
 from .config import load_config, load_credentials, load_device_details
 from .download import download_and_save
+from .logger import setup_logging
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -22,6 +26,9 @@ def main() -> None:
     saved for each device to the output directory. If an output directory
     already exists, a warning is provided.
     """
+    setup_logging()
+    logger.info("Starting execution.")
+
     parser = ArgumentParser(description="Download data from Thingsboard.")
     parser.add_argument(
         "-c",
@@ -125,6 +132,7 @@ def main() -> None:
         limit=limit,
         agg=agg,
     )
+    logger.info("Finished execution.")
 
 
 if __name__ == "__main__":
