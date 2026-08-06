@@ -3,7 +3,7 @@ name = "thingsboard-download"
 dynamic = ["version"]
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = [
     "pandas>=3.0.5",
     "python-dotenv>=1.2.2",
@@ -18,7 +18,6 @@ dev = [
 
 [tool.ruff]
 target-version = "py313"
-exclude = ["main/migrations/"]
 
 [tool.ruff.lint]
 select = [
