@@ -30,6 +30,9 @@ password = "your-password"
 # ...or an API key
 # api_key = "your-api-key"
 
+# ...or a public ID for public data
+# public_id = "a_public_id"
+
 [download]
 devices = ["DEVICE001", "DEVICE002"]
 variables = ["temperature", "turbidity"]
@@ -53,6 +56,7 @@ The following environment variables are supported:
 - `THINGSBOARD_USERNAME`
 - `THINGSBOARD_PASSWORD`
 - `THINGSBOARD_API_KEY`
+- `THINGSBOARD_PUBLIC_ID`
 - `DEVICES` as a comma-separated list, e.g., `DEVICES=DEVICE001,DEVICE002`
 - `VARIABLES` as a comma-separated list, e.g., `VARIABLES=temperature,turbidity`
 - `START_TIME` in `YYYY-MM-DD HH:MM:SS` format
@@ -64,10 +68,14 @@ The following environment variables are supported:
 
 Note the following:
 
-- You can provide either a username and password **or** an API key for authorization
+- You can provide either a username and password, an API key or a public ID for authorization
 - If `start_time` and `end_time` are both omitted, the tool downloads the last 30 days of data
 - If `variables` are omitted, the tool requests all available timeseries keys for each device
 - `interval`, `limit` and `agg` are all optional and will default to `None` if not provided
+
+### Accessing public data
+
+You can access publicly available data without providing login credentials by using a public ID. You can retrieve the public ID from the URL for a public dashboard (i.e. `https://<host>/dashboard/<DASHBOARD_ID>?publicId=<PUBLIC_ID>`).
 
 ### Command-line options
 
