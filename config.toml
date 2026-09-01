@@ -6,6 +6,7 @@ url = "https://example.com"             # Thingsboard URL
 username = "your.username@example.com"
 password = "your-password"
 # api_key = "your-api-key"
+# public_id = "a_public_id"
 
 [download]
 devices = ["DEVICE001", "DEVICE002"]
