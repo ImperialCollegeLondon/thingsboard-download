@@ -38,12 +38,10 @@ def get_device_id(
         page_size = 1000  # the number of devices to fetch per page
         while True:
             response = client.get_customer_devices(public_id, page_size, page)
-            print(response.data)
             device_id = next(
                 (device.id for device in response.data if device.name == device_name),
                 None,
             )
-            print("device id", device_id)
             if device_id:
                 return device_id
             if not response.has_next:
