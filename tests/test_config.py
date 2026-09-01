@@ -183,6 +183,22 @@ def test_load_credentials_password(tmp_path):
     assert result["credentials"]["username"] == "user"
 
 
+def test_load_credentials_public_id(tmp_path):
+    """Test the load_credentials function with a public_id."""
+    (tmp_path / "config.toml").write_text(
+        """\
+    [thingsboard]
+    url = "https://example.com"
+
+    [auth]
+    public_id = "test_public_id"
+    """
+    )
+    result = load_credentials(tmp_path / "config.toml")
+    assert result["credentials"]["type"] == "public_id"
+    assert result["credentials"]["value"] == "test_public_id"
+
+
 def test_load_credentials_no_url(tmp_path):
     """Test load_credentials raises an error with no URL."""
     (tmp_path / "config.toml").write_text(

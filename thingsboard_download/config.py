@@ -130,20 +130,27 @@ def load_credentials(
     username = os.getenv("THINGSBOARD_USERNAME", auth.get("username"))
     password = os.getenv("THINGSBOARD_PASSWORD", auth.get("password"))
     api_key = os.getenv("THINGSBOARD_API_KEY", auth.get("api_key"))
+    public_id = os.getenv("THINGSBOARD_PUBLIC_ID", auth.get("public_id"))
 
+    # Private authentication methods are given precedence over public ID
     if api_key:
         logger.info("Using API key to access Thingsboard.")
         credentials = {"type": "api_key", "value": api_key}
     elif username and password:
         logger.info("Using username and password to access Thingsboard.")
         credentials = {"type": "password", "username": username, "password": password}
+    elif public_id:
+        logger.info("Using public ID to access Thingsboard.")
+        credentials = {"type": "public_id", "value": public_id}
     else:
         logger.error(
-            "No authentication details configured (API key or username/password)."
+            "No authentication details configured (API key, username/password or public"
+            " ID)."
         )
         raise ValueError(
-            "No authentication details provided. Provide either an API key or username"
-            " and password using environment variables or the config.toml file."
+            "No authentication details provided. Provide either an API key, username"
+            " and password or public ID (using environment variables or the config.toml"
+            " file."
         )
 
     return {"thingsboard_url": tb_url, "credentials": credentials}

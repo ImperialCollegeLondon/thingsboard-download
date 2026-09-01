@@ -12,6 +12,7 @@ url = "https://example.com"
 username = "user"
 password = "pass"
 api_key = "test_api_key"
+public_id = "test_public_id"
 
 [download]
 devices = ["DEV001", "DEV002"]
