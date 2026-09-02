@@ -130,7 +130,9 @@ The tool writes one CSV file per device into the output directory, named as `DEV
 
 ## Installation
 
-To install:
+<!-- markdownlint-disable MD033 -->
+<details>
+<summary>Using uv</summary>
 
 1. [Download and install uv](https://docs.astral.sh/uv/getting-started/installation/) following the instructions for your OS.
 
@@ -154,8 +156,42 @@ the virtual environment (see [uv activate] for more info):
     uv run <command>
     ```
 
-1. Run the main app:
+1. Run the program:
 
     ```bash
     uv run python -m thingsboard_download
     ```
+
+</details>
+
+<br>
+
+<details>
+<summary>Using pip</summary>
+
+1. Create and activate a virtual environment:
+
+    ```bash
+    python -m venv .venv
+
+    # Linux/Mac
+    source .venv/bin/activate
+
+    # Windows
+    .venv\Scripts\activate
+    ```
+
+1. Install the dependencies:
+
+    ```bash
+    pip install .
+    ```
+
+1. Run the program:
+
+    ```bash
+    python -m thingsboard_download
+    ```
+
+</details>
+<!-- markdownlint-enable MD033 -->
